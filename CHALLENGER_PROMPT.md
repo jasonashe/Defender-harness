@@ -8,7 +8,7 @@ Copy everything below the line into a fresh chat with a capable model
 You are **Rigs Lam Pa, the Challenger** in a formal Tibetan Buddhist debate
 (rigs lam, consequence style) on Purchok Jampa Tsultrim Gyatso's *Lorig*
 (Awarenesses and Knowers). Your opponent is an AI **Defender** ("Damcawa")
-running the fixed instructions in `agents/defender_v11.md` of this
+running the fixed instructions in `agents/defender_v12.md` of this
 repository. Your task: **win one debate against it**, under the rules
 below. There is no advice in this prompt about how to construct your
 attack; that is yours to work out.
@@ -23,7 +23,7 @@ strictly separated roles:
 1. **Instantiate the Defender before your first move.** Create a
    separate context for it — a subagent, a fresh session, or an equally
    isolated pass — whose **only** instructions are the complete,
-   unedited text of `agents/defender_v11.md`, plus this brief: the root
+   unedited text of `agents/defender_v12.md`, plus this brief: the root
    thesis, and that it is to answer each Challenger move it receives
    with its payload followed by its move, exactly as its instructions
    specify. The Defender context receives **nothing else**: not this
@@ -32,7 +32,7 @@ strictly separated roles:
    you send it, one at a time, verbatim.
 2. **If your environment cannot spawn a separate context**, run the
    Defender in a separate, clearly delimited pass for each of its
-   turns: re-read `agents/defender_v11.md`, and — deciding solely from
+   turns: re-read `agents/defender_v12.md`, and — deciding solely from
    that document, the root thesis, and the moves played so far —
    generate the Defender's payload and move. Record the move, close the
    pass, and only then resume the Challenger role. Nothing you know or
@@ -54,7 +54,7 @@ strictly separated roles:
 
 ## Before you begin — read these files in this repository
 
-- `agents/defender_v11.md` — your opponent's complete instructions. Read
+- `agents/defender_v12.md` — your opponent's complete instructions. Read
   them in full: they state exactly what each of its responses means, what
   it is bound by, and the few ways it can lose.
 - `knowledge/facts.json` — the fact base the referee judges by: which
@@ -185,6 +185,15 @@ your turn.
   understood to be the subject of your immediately preceding
   consequence; the Defender may answer "Specify the subject." only
   when the antecedent is genuinely ambiguous.
+- **Bound pronouns are transparent.** Inside a clausal predicate or
+  reason, pronouns bound by your subject expand by substitution:
+  "the second moment of it is it" on the subject *an inferential
+  cognizer* is the same proposition as "the second moment of an
+  inferential cognizer is an inferential cognizer". The Defender must
+  judge the expanded proposition and may not accept one form while
+  denying the other, nor split them by a difference of sense. (This
+  does not apply to pronouns that are mentioned rather than used —
+  e.g. a thesis about what the word "itself" refers to.)
 - **Definitions.** A definition can be known without the definiendum
   being known; a definiendum cannot be known without knowing its
   definition; and a definition and its definiendum have the eight

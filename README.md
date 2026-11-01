@@ -6,7 +6,7 @@ consequence style) on Purchok Jampa Tsultrim Gyatso's *Lorig*
 (*Blo rig gi rnam bzhag*, "Awarenesses and Knowers"), plus the deterministic
 referee and fact base that judge every move.
 
-The Defender in this package is **defender_v11** — the current version from
+The Defender in this package is **defender_v12** — the current version from
 a 35-iteration adversarial evolution loop in which Challenger agents tried
 to trap it into contradicting its own concessions, the root thesis, or
 Purchok's text. It survived iteration 35 (six matches) with no violations,
@@ -20,8 +20,8 @@ win* below), not by anyone's impression of the debate.
 
 | Path | What it is |
 |---|---|
-| `agents/defender_v11.md` | The Defender's complete instructions (system prompt), current version. This is the opponent, unabridged. (`agents/defender_v10.md`, its predecessor, is retained for reference.) |
-| `harness/referee.py` | Deterministic referee, v2.4 (Python 3, standard library only). Validates move syntax, evaluates minor premises and pervasions against the fact base, maintains the Defender's concession ledger, judges Khor lo! / Tsa! calls, and scores the match. |
+| `agents/defender_v12.md` | The Defender's complete instructions (system prompt), current version. This is the opponent, unabridged. (`agents/defender_v10.md` and `agents/defender_v11.md`, its predecessors, are retained for reference.) |
+| `harness/referee.py` | Deterministic referee, v2.5 (Python 3, standard library only). Validates move syntax, evaluates minor premises and pervasions against the fact base, maintains the Defender's concession ledger, judges Khor lo! / Tsa! calls, and scores the match. |
 | `harness/justification.py` | Referee support module (scores the Defender's per-turn justification payloads when a transcript carries them). |
 | `knowledge/facts.json` | The fact base: canonical subjects and predicates (exact strings), `is_a` facts, pervasions (with counterexamples where a pervasion is false), set relations, non-existent subjects. |
 | `knowledge/matrix.md` | The taxonomy of awarenesses and knowers: definitions and divisions, each quotation verified against the etext at recorded character offsets. |
@@ -62,7 +62,7 @@ Expected headline result (last line of the output):
 example Claude), together with access to this repository. The prompt
 instructs the model to instantiate the Defender itself — a separate
 context, or clearly delimited passes governed solely by
-`agents/defender_v11.md` — and to play Challenger against it, using only
+`agents/defender_v12.md` — and to play Challenger against it, using only
 the Defender's public move text for its own decisions, never editing a
 Defender response, and keeping the full record for referee scoring. One
 chat, no relaying.
@@ -71,7 +71,7 @@ chat, no relaying.
 chats (or two agents), so that neither side sees the other's private
 reasoning, and relay the moves yourself:
 
-1. **Set up the Defender chat.** Give it `agents/defender_v11.md` as its
+1. **Set up the Defender chat.** Give it `agents/defender_v12.md` as its
    system prompt / project instructions, word for word, unedited. Then
    send it a brief in this form:
 
@@ -231,5 +231,5 @@ subjects, the Khor sum! rename, and the definition/definiendum rules
 (a definition can be known without the definiendum being known; a
 definiendum cannot be known without its definition; definition and
 definiendum have the eight doors of pervasion — they are mutually
-inclusive). The referee is v2.4 (self-test 156/156). The full iteration log lives in the parent project and is not
+inclusive). defender_v12 (same day) adds bound pronoun transparency: a clausal predicate's bound pronouns expand by substituting the subject, so "the second moment of it is it" and "the second moment of it is an inferential cognizer" are the same proposition and may not be split. The referee is v2.5 (self-test 159/159). The full iteration log lives in the parent project and is not
 needed to use this package.

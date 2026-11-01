@@ -1,5 +1,33 @@
 #!/usr/bin/env python3
-"""Referee harness v2.4 for the Lorig debate arena (deterministic, stdlib only).
+"""Referee harness v2.5 for the Lorig debate arena (deterministic, stdlib only).
+
+v2.5 (2026-11-01): bound-pronoun transparency (Argon consultation
+013). At parse time, in C1/C2 moves with a concrete subject, bound
+pronouns (it / its / itself) standing in genuinely bound positions
+of a clausal predicate or reason slot ("of it", a clause-initial
+it/its, or a final copular pronoun; quoted spans are masked: mention,
+not use, is excepted) are expanded by substitution of the subject
+term, so a clausal predicate and its explicit substitution produce
+the IDENTICAL ledger key. The bound-position gate matters: a
+canonical term may contain "its" deep inside its own fixed wording
+("...as its uncommon dominant condition that is free of
+conceptuality..."), where the pronoun belongs to the term's head
+noun and must NOT be expanded — expanding there broke NPV slot
+binding on the iteration-35 gold control during development, which
+is how the gate got its final shape. Defender NPV slots receive the
+same expansion against the preceding challenger subject, so slot
+binding stays symmetric. A new
+check fires when the Defender answers "Why" to a C1 thesis whose
+(beta-equivalent) atom already stands in the prior ledger closure:
+accepting the pronoun form while denying the explicit form (or vice
+versa) is a scored split. Bare-pervasion (C1_COND) consequents carry
+no concrete subject at parse time, so pervasion instantiation over
+clausal consequents remains governed by defender_v12's prompt gate
+and the judge; this limitation is deliberate and recorded.
+Transcripts without bound pronouns in C1/C2 slots score
+bit-identically to v2.4, except for the referee_version string.
+
+v2.4 (2026-11-01): the user's five live-match amendments.
 
 v2.4 (2026-11-01): the user's five live-match amendments.
   (1) The Posit demand ("Posit an example.", or the bare shorthand
@@ -360,6 +388,39 @@ def split_neg(s):
         return norm_term(s[4:]), False
     return norm_term(s), True
 
+_QUOTED_SPAN_RE = re.compile(r"(\"[^\"]*\"|'[^']*')")
+_BOUND_PRONOUN_RE = re.compile(r"\b(itself|its|it)\b")
+
+def _expand_bound(text, subject):
+    """v2.5: beta-expand bound pronouns in a predicate/reason slot by
+    substituting the move's concrete subject. Quoted spans are masked
+    (mention, not use). Returns the text unchanged when there is no
+    subject or no bound pronoun."""
+    if not subject or not text or not _BOUND_PRONOUN_RE.search(text):
+        return text
+    # Bound positions only: a canonical TERM may contain "its" deep
+    # inside its own fixed wording (e.g. "...as its uncommon dominant
+    # condition that is free of conceptuality..."), where the pronoun
+    # belongs to the term's head noun, not to the debate subject.
+    # Expansion applies only where a pronoun stands in a genuinely
+    # bound position of a clause predicated of the subject: "of it"
+    # (the second moment of it is ...), a clause-initial it/its, or a
+    # final copular pronoun (... is it / is not it / is itself).
+    t = text.strip().rstrip(".")
+    if not (re.search(r"\bof (it|itself)\b", t)
+            or re.match(r"(it|its)\b", t)
+            or re.search(r"\bis (not )?(it|itself)$", t)):
+        return text
+    subj = subject.strip()
+    poss = subj + "'s"
+    def _sub(seg):
+        seg = re.sub(r"\bitself\b", subj, seg)
+        seg = re.sub(r"\bits\b", poss, seg)
+        seg = re.sub(r"\bit\b", subj, seg)
+        return seg
+    parts = _QUOTED_SPAN_RE.split(text)
+    return "".join(p if i % 2 == 1 else _sub(p) for i, p in enumerate(parts))
+
 # ---------------------------------------------------------------- facts
 
 class Facts:
@@ -695,8 +756,8 @@ def parse_challenger(text):
             if not reason_s.endswith("."):
                 problems.append("C2 does not end with a period")
             reason_s = reason_s.rstrip(".")
-            pred, ppol = split_neg(pred_s)
-            reason, _ = split_neg(reason_s)
+            pred, ppol = split_neg(_expand_bound(pred_s, subj))
+            reason, _ = split_neg(_expand_bound(reason_s, subj))
             return Move("C2", subject=subj, predicate=pred, pred_pol=ppol,
                         reason=reason, reason_pol=False), not problems, problems
         if j >= 0:
@@ -705,8 +766,8 @@ def parse_challenger(text):
             if not reason_s.endswith("."):
                 problems.append("C2 does not end with a period")
             reason_s = reason_s.rstrip(".")
-            pred, ppol = split_neg(pred_s)
-            reason, rpol = split_neg(reason_s)
+            pred, ppol = split_neg(_expand_bound(pred_s, subj))
+            reason, rpol = split_neg(_expand_bound(reason_s, subj))
             return Move("C2", subject=subj, predicate=pred, pred_pol=ppol,
                         reason=reason, reason_pol=rpol), not problems, problems
         if "because" in rest:
@@ -715,7 +776,7 @@ def parse_challenger(text):
         pred_s = _clean_slot(rest)
         if not pred_s.endswith("."):
             problems.append("C1 does not end with a period")
-        pred, ppol = split_neg(pred_s.rstrip("."))
+        pred, ppol = split_neg(_expand_bound(pred_s.rstrip("."), subj))
         return Move("C1", subject=subj, predicate=pred, pred_pol=ppol), not problems, problems
     problems.append("does not match any of C1-C4")
     return Move("INVALID"), False, problems
@@ -756,8 +817,8 @@ def parse_defender(text, context):
         return Move("D_RNE", subject=_clean_slot(m.group(1)), reason=norm_term(m.group(2))), not problems, problems
     m = re.match(r"^No pervasion\. If it is (not )?(.+), it is not necessarily (not )?(.+)\.$", t)
     if m:
-        return Move("D_NPV", reason=norm_term(m.group(2)), reason_pol=not m.group(1),
-                    predicate=norm_term(m.group(4)), pred_pol=not m.group(3)), not problems, problems
+        return Move("D_NPV", reason=norm_term(_expand_bound(m.group(2), context.get("prev_subject"))), reason_pol=not m.group(1),
+                    predicate=norm_term(_expand_bound(m.group(4), context.get("prev_subject"))), pred_pol=not m.group(3)), not problems, problems
     m = re.match(r"^(.+) is (.+) but not (.+)\.$", t)
     if m:
         return Move("D3B", example=_clean_slot(m.group(1)), reason=norm_term(m.group(2)),
@@ -2804,7 +2865,7 @@ def score_match(transcript, facts=None):
                     if turn_ok:
                         compliant_turns.add(idx)
                     continue
-            ctx = {"prev_defender_text": ledger.last_valid_d_text}
+            ctx = {"prev_defender_text": ledger.last_valid_d_text, "prev_subject": getattr(prev_c, "subject", None) if prev_c is not None else None}
             mv, ok, probs = parse_defender(text, ctx)
             if not ok and mv.kind != "D_REPEAT":
                 violate("defender syntax: " + "; ".join(probs))
@@ -3068,6 +3129,16 @@ def score_match(transcript, facts=None):
                 if minor_in and perv_in:
                     forced_events.append({"turn": turn_no, "thesis": f"{x} is {y}"})
                     violate("failed forced Accept: minor premise and pervasion were both already conceded")
+            # v2.5: pronoun-split check — a C1 thesis whose atom
+            # already stands in the prior closure (in either its
+            # pronoun or its explicit form; parse-time expansion makes
+            # the two the same key) may not be met with "Why".
+            if prev_c is not None and prev_c.kind == "C1" and mv.kind == "D_WHY":
+                prior_atoms, _, _ = closure([c for c in ledger.commitments if c.turn < turn_no])
+                tgt = (norm_term(prev_c.subject), norm_term(prev_c.predicate), prev_c.pred_pol)
+                if tgt in prior_atoms:
+                    forced_events.append({"turn": turn_no, "thesis": f"{tgt[0]} is {tgt[1]}"})
+                    violate("failed forced Accept: thesis already stands in the ledger (bound-pronoun forms and their explicit substitutions are the same commitment)")
             # v2.1: register this turn's treatments for escape-
             # challenge trigger verification — the propositions its
             # Accept / NPV-concession / RNE acts establish, and (for
@@ -3137,7 +3208,7 @@ def score_match(transcript, facts=None):
             "trap_complexity": round(trap, 3),
         },
         "fidelity_detail": {"correct": fid_correct, "incorrect": fid_wrong, "unevaluable": fid_unknown},
-        "referee_version": "2.4",
+        "referee_version": "2.5",
         "justification_det": justification_det,
         "hard_justification_failures": hard_justification_failures,
         "epistemic_forfeit": epistemic_forfeit,
