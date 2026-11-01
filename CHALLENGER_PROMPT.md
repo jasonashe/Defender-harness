@@ -13,6 +13,45 @@ repository. Your task: **win one debate against it**, under the rules
 below. There is no advice in this prompt about how to construct your
 attack; that is yours to work out.
 
+## You run the Defender yourself — this is mandatory
+
+No human will relay moves for you, and there is no external Defender
+session waiting to be played against. **You must run the Defender
+harness yourself, and so in effect play against yourself** — as two
+strictly separated roles:
+
+1. **Instantiate the Defender before your first move.** Create a
+   separate context for it — a subagent, a fresh session, or an equally
+   isolated pass — whose **only** instructions are the complete,
+   unedited text of `agents/defender_v10.md`, plus this brief: the root
+   thesis, and that it is to answer each Challenger move it receives
+   with its payload followed by its move, exactly as its instructions
+   specify. The Defender context receives **nothing else**: not this
+   prompt, not your plans, notes or reasoning, not the turn order of any
+   line you are considering. It learns the debate only from the moves
+   you send it, one at a time, verbatim.
+2. **If your environment cannot spawn a separate context**, run the
+   Defender in a separate, clearly delimited pass for each of its
+   turns: re-read `agents/defender_v10.md`, and — deciding solely from
+   that document, the root thesis, and the moves played so far —
+   generate the Defender's payload and move. Record the move, close the
+   pass, and only then resume the Challenger role. Nothing you know or
+   intend as Challenger may steer a Defender answer.
+3. **Never edit a Defender response.** Do not soften, paraphrase,
+   "correct", regenerate or improve what the Defender, run this way,
+   answers. Its answer is the answer of record exactly as produced,
+   whether or not it is the answer you were hoping for. If the Defender
+   protocol, faithfully followed, gives a determinate answer, that
+   answer stands.
+4. **Firewall.** As Challenger, you may use only the Defender's **move
+   text**. The payloads, state listings and reasoning blurbs produced
+   in the Defender passes are the Defender's private record: do not
+   read them into your Challenger decisions, do not quote them, and do
+   not let knowledge of them shape your next move. Your Challenger play
+   is based on the public move transcript alone.
+5. Keep the complete record (moves, and the Defender's payloads where
+   produced) so the match can be scored afterwards exactly as played.
+
 ## Before you begin — read these files in this repository
 
 - `agents/defender_v10.md` — your opponent's complete instructions. Read
@@ -42,10 +81,11 @@ attack; that is yours to work out.
 - A match lasts at most **24 turns** (12 moves each) unless a win (below)
   occurs earlier.
 - The Defender replies in a fixed set of response forms (listed below).
-  A human may be relaying moves between you and the Defender. If a
-  Defender reply reaches you together with extra material (a JSON
-  payload, a state listing, a reasoning blurb), **ignore everything
-  except the move text itself** — you play from the public moves only.
+  You obtain its replies by running it yourself, under the mandatory
+  self-play protocol above. Whatever extra material a Defender pass
+  produces (a JSON payload, a state listing, a reasoning blurb), **only
+  the move text enters the debate** — you play from the public moves
+  only.
 
 ## Your moves — the only legal forms
 
@@ -225,7 +265,13 @@ the above, you have not won — say so plainly.
 1. The complete debate, move by move, labelled Challenger / Defender.
 2. The same debate as a transcript file in the referee's format:
    `{"match_id": ..., "topic": ..., "root_thesis": {"subject": ..., "predicate": ...}, "match_type": "A", "turns": [{"turn": 1, "role": "challenger", "text": "..."}, ...]}`
-   with move text only in each `text` field.
+   with move text only in each `text` field. Where your Defender passes
+   produced payloads, attach each one to its Defender turn as a
+   `defender_payload` field, unedited — the referee's justification
+   checks (and the `epistemic_forfeit` win condition) apply only to a
+   transcript that carries them. State in your report that the Defender
+   was run by you under the self-play protocol above, and how (separate
+   context or delimited passes).
 3. The referee's verdict: run the referee on the transcript (or hand the
    transcript to the user to run) and report its summary line and which
    win condition, if any, was met.

@@ -30,7 +30,7 @@ win* below), not by anyone's impression of the debate.
 | `knowledge/quote_registry.json` | 153 pre-classified spans of the etext used to settle whether a quoted consequence stands in Purchok's own voice or an opponent's. |
 | `sources/S06857E4_blo_rig.txt` | Purchok's *Lorig* itself — the Unicode Tibetan etext (public-domain historical text). The ground truth of the debate. |
 | `examples/example_match_defender_survives.json` | A complete moves-only transcript of a real match the Defender survived, in referee format. Use it to test your installation (see below). |
-| `CHALLENGER_PROMPT.md` | A ready-to-paste prompt that turns any capable LLM into the Challenger, with the complete rules, move forms, vocabulary and win conditions — and no strategy advice. |
+| `CHALLENGER_PROMPT.md` | A ready-to-paste prompt that turns any capable LLM into the Challenger, with the complete rules, move forms, vocabulary and win conditions — and no strategy advice. It also instructs the Challenger to **run the Defender itself** under a strict self-play protocol, so a single model plays both sides with a firewall between them. |
 
 Deliberately **not** included: the evolved Challenger prompts, the
 Challenger's debate archive, and the fault-line analyses produced during
@@ -57,8 +57,19 @@ Expected headline result (last line of the output):
 
 ## How to run a debate
 
-You need two separate conversations (two chats, or two agents), so that
-neither side sees the other's private reasoning:
+**Option A — self-play (the prepared route).** Paste
+`CHALLENGER_PROMPT.md` into a single chat with a capable model (for
+example Claude), together with access to this repository. The prompt
+instructs the model to instantiate the Defender itself — a separate
+context, or clearly delimited passes governed solely by
+`agents/defender_v10.md` — and to play Challenger against it, using only
+the Defender's public move text for its own decisions, never editing a
+Defender response, and keeping the full record for referee scoring. One
+chat, no relaying.
+
+**Option B — two conversations.** Or run the two sides in two separate
+chats (or two agents), so that neither side sees the other's private
+reasoning, and relay the moves yourself:
 
 1. **Set up the Defender chat.** Give it `agents/defender_v10.md` as its
    system prompt / project instructions, word for word, unedited. Then
