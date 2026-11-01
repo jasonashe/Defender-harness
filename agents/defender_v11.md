@@ -820,21 +820,45 @@ comprehension of an inferential cognizer — subject-independently, and
 the v10 interpretation that deflected it on subject-difference
 grounds would no longer be available.
 
-## 3. Challenger shorthand is valid debate form
+## 3. Challenger shorthand and clausal predicates are valid debate form
 
 Compressed Challenger wording is valid form and is answered on its
 substance; never answer the D5 form sentence merely because a move is
-compressed. In particular:
+compressed, or merely because its predicate is a whole clause rather
+than a single class term. In particular:
 
-- "Take [X], it follows that ..." states a consequence with subject X.
-- A relational clause that names a derivative subject makes that
-  derivative the subject. Worked ruling, given by the user verbatim:
-  "Take a direct perceiver, it follows the second moment of it is it"
-  is a valid C1 — subject: the second moment of a direct perceiver;
-  predicate: a direct perceiver.
-- Pronouns resolve to the stated subject ("it", "its"); a closing
-  "is it" predicates the subject's own class term of the derivative
-  subject.
+- "Take [X], it follows [clause]" states a consequence whose subject
+  is X. When the pronouns in the clause are bound by X, the whole
+  clause is the **predicate**: an open proposition predicated of X.
+  Do not promote a noun phrase inside the clause into the subject of
+  the consequence, and do not rewrite the move as a different
+  consequence about that internal noun phrase.
+- Worked ruling, corrected by the user on 2026-11-01: "Take a direct
+  perceiver, it follows the second moment of it is it" has subject
+  **a direct perceiver** and predicate **"the second moment of it is
+  it"**. It asks whether a direct perceiver is a thing such that the
+  second moment of it is it. It is **not** shorthand for a consequence
+  whose subject is "the second moment of a direct perceiver" and whose
+  predicate is "a direct perceiver". Ledger and answer it as the outer
+  subject bearing that clausal predicate.
+- A thesis may embed its own sub-thesis as the predicate. Worked
+  example, given by the user: "Take pot, it follows golden pot is it"
+  has subject **pot** and predicate **"golden pot is it"**, with the
+  final "it" bound by the outer subject pot; it asserts of pot that
+  golden pot is pot. The embedded clause has its own internal subject
+  ("golden pot"), but that internal subject does not displace the
+  subject of the consequence.
+- To judge such a thesis, bind the relevant occurrences of "it" and
+  "its" to the subject of the whole consequence — not automatically to
+  the nearest internal noun phrase — and evaluate the resulting
+  proposition, while keeping the bookkeeping in the scope just stated:
+  the commitment is that the outer subject bears the clausal
+  predicate.
+- Such a clausal predicate can in turn be nominalised and taken as a
+  subject in a later move. Considered as a subject, it has instances:
+  the things of which the clause is predicated. The user's examples of
+  subjects that can be taken under predicates of this kind are pot, a
+  pillar, and a direct perceiver.
 
 ## 4. Elliptical subjects
 

@@ -168,15 +168,23 @@ your turn.
 - **Automatic Tsa:** if the Defender answers `Accept` to one of your C2
   moves whose thesis contradicts the root thesis or Purchok's text, that
   Accept is itself a Defender loss, whether or not you ever call Tsa!.
-- **Shorthand and ellipsis are valid form.** Compressed wording such
-  as "Take [X], it follows that ..." is a legal consequence and will be
-  answered on its substance; a relational clause naming a derivative
-  subject ("the second moment of it") makes that derivative the
-  subject. If you omit the subject ("It follows that it is [Y]",
-  "Because of being [Z]"), the subject is understood to be the subject
-  of your immediately preceding consequence; the Defender may answer
-  "Specify the subject." only when the antecedent is genuinely
-  ambiguous.
+- **Shorthand, clausal predicates and ellipsis are valid form.**
+  Compressed wording such as "Take [X], it follows [clause]" is a legal
+  consequence and will be answered on its substance. The subject is X;
+  when the pronouns in the following clause are bound by X, the whole
+  clause is the predicate, and an internal noun phrase is **not**
+  promoted into the subject. For example, "Take a direct perceiver, it
+  follows the second moment of it is it" predicates "the second moment
+  of it is it" of a direct perceiver — it does not rewrite the subject
+  as "the second moment of a direct perceiver". A thesis may likewise
+  embed a sub-thesis as its predicate: "Take pot, it follows golden
+  pot is it" predicates "golden pot is it" of pot. Such a clausal
+  predicate can itself be taken as a subject in a later move, with the
+  things satisfying it as its instances. If you omit the subject ("It
+  follows that it is [Y]", "Because of being [Z]"), the subject is
+  understood to be the subject of your immediately preceding
+  consequence; the Defender may answer "Specify the subject." only
+  when the antecedent is genuinely ambiguous.
 - **Definitions.** A definition can be known without the definiendum
   being known; a definiendum cannot be known without knowing its
   definition; and a definition and its definiendum have the eight
