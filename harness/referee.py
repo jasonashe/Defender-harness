@@ -1,5 +1,32 @@
 #!/usr/bin/env python3
-"""Referee harness v2.3 for the Lorig debate arena (deterministic, stdlib only).
+"""Referee harness v2.4 for the Lorig debate arena (deterministic, stdlib only).
+
+v2.4 (2026-11-01): the user's five live-match amendments.
+  (1) The Posit demand ("Posit an example.", or the bare shorthand
+  "Posit") is now also legal immediately after the Defender's answer
+  to a bare-conditional pervasion statement (Accept, "Why" or "No
+  pervasion"), not only after RNE/NPV on a reasoned consequence; the
+  Defender's answer may be an example of the pervasion ("[E], which
+  is [Z] and is [Y]."), a counterexample (the existing D3 forms), or
+  one of the new non-existence forms "There is no example." /
+  "There is no counterexample.".
+  (2) A text-established pervasion is subject-independent: against a
+  pervasion-repair C6, an interpretation whose payload ground is
+  SUBJECT_QUALIFICATION no longer deflects the quotation — the
+  episode resolves QUOTE_UPHELD with the cascade applied. (When
+  Purchok establishes a thesis using a reason in his own voice, the
+  pervasion of that reason stands independent of his subject.)
+  (3)+(4) Play-level shorthand and elliptical-subject rules live in
+  defender_v11's V11 module; transcripts record normalized forms.
+  The Defender's clarification form "Specify the subject." is parsed
+  (D_SPEC) and tolerated where the D5 sentence is tolerated.
+  (5) The C4 contradiction call is renamed "Khor sum!" (the three
+  spheres of contradiction complete); "Khor lo!" is accepted as its
+  legacy spelling and normalised to "Khor sum!" in reports.
+Transcripts without these features score bit-identically to v2.3,
+except for the referee_version string.
+
+v2.3 (2026-10-28): the Challenger debate archive (Part 5 of the
 
 v2.3 (2026-10-28): the Challenger debate archive (Part 5 of the
 user's redesign; Argon consultation 012, with the coordinator
@@ -579,13 +606,14 @@ def parse_challenger(text):
     t = text.strip()
     if any(c in MARKDOWN_CHARS for c in t):
         problems.append("markdown characters present")
-    if "\n" in t and not t.startswith(("Khor lo!", "Tsa!")):
+    if "\n" in t and not t.startswith(("Khor lo!", "Khor sum!", "Tsa!")):
         problems.append("multiple lines / extra prose")
-    if t == "Posit an example.":
+    if t in ("Posit an example.", "Posit", "Posit."):
         return Move("C3"), not problems, problems
-    if t.startswith("Khor lo!") or t.startswith("Tsa!"):
-        call = "Khor lo!" if t.startswith("Khor lo!") else "Tsa!"
-        rest = t[len(call):].strip()
+    if t.startswith(("Khor lo!", "Khor sum!")) or t.startswith("Tsa!"):
+        call = "Tsa!" if t.startswith("Tsa!") else "Khor sum!"
+        prefix = "Tsa!" if call == "Tsa!" else ("Khor sum!" if t.startswith("Khor sum!") else "Khor lo!")
+        rest = t[len(prefix):].strip()
         if not rest:
             problems.append("C4 without the required contradiction demonstration")
         return Move("C4", call=call, demonstration=rest), not problems, problems
@@ -707,6 +735,16 @@ def parse_defender(text, context):
         return Move("D_ALR"), not problems, problems
     if t == "State your thesis or reason in valid debate form.":
         return Move("D_SYN"), not problems, problems
+    if t == "Specify the subject.":
+        return Move("D_SPEC"), not problems, problems
+    if t == "There is no example.":
+        return Move("D3_NONE_EX"), not problems, problems
+    if t == "There is no counterexample.":
+        return Move("D3_NONE_CE"), not problems, problems
+    m = re.match(r"^(.+), which is (.+) and is (.+)\.$", t)
+    if m:
+        return Move("D3C", example=_clean_slot(m.group(1)), reason=norm_term(m.group(2)),
+                    predicate=norm_term(m.group(3))), not problems, problems
     m = re.match(r"^Reason not established\. (.+) is not (.+)\.$", t)
     if m:
         return Move("D_RNE", subject=_clean_slot(m.group(1)), reason=norm_term(m.group(2))), not problems, problems
@@ -1640,6 +1678,7 @@ def score_match(transcript, facts=None):
     prev_d = None            # last defender Move
     prev_d_text = None
     d_before_c3 = None       # defender move that a C3 refers back to
+    prev_d_prev_c_kind = None  # v2.4: challenger move kind the last defender move answered
     forced_events = []
     telemetry_events = []
     consumed_false_leaves = set()
@@ -2316,6 +2355,13 @@ def score_match(transcript, facts=None):
             return
         pl = t.get("defender_payload")
         deriv = (pl.get("derivation") or {}) if isinstance(pl, dict) else {}
+        if ep["repair_target"] == "PERVASION" and deriv.get("interp_ground") == "SUBJECT_QUALIFICATION":
+            # v2.4: a text-established pervasion is subject-independent;
+            # subject qualification cannot deflect a pervasion repair.
+            violate("interp_subject_qualification: subject qualification is not a valid interpretation against a pervasion-repair quotation (the pervasion of a reason Purchok uses in his own voice stands independent of his subject)")
+            _c6_report_ep(ep, "QUOTE_UPHELD", True, deflection_failed=True)
+            _c6_cascade(ep)
+            return
         if deriv.get("interp_ground") == "TERM_SENSE_SHIFT":
             mod = deriv.get("claimed_modifier_tibetan")
             cite = (turns_by_no.get(ep["c6_turn"]) or {}).get("text_cite") or {}
@@ -2422,8 +2468,9 @@ def score_match(transcript, facts=None):
                 prev_c, prev_c_ok = mv, False
             else:
                 if mv.kind == "C3":
-                    if not prev_d or prev_d.kind not in ("D_RNE", "D_NPV"):
-                        violate("C3 not immediately after 'Reason not established' or 'No pervasion'")
+                    if not prev_d or prev_d.kind not in ("D_RNE", "D_NPV") and not (
+                            prev_d_prev_c_kind == "C1_COND" and prev_d.kind in ("D_ACC", "D_WHY")):
+                        violate("C3 not immediately after 'Reason not established' or 'No pervasion', nor after an answer to a pervasion statement")
                     else:
                         d_before_c3 = prev_d
                 if mv.kind == "C4":
@@ -2763,16 +2810,16 @@ def score_match(transcript, facts=None):
                 violate("defender syntax: " + "; ".join(probs))
             # contextual legality
             if prev_c is not None and prev_c.kind == "INVALID":
-                if mv.kind != "D_SYN":
+                if mv.kind not in ("D_SYN", "D_SPEC"):
                     violate("defender answered a malformed challenger move with something other than the D5 sentence")
             elif prev_c is not None:
-                if prev_c_illegal and mv.kind == "D_SYN":
+                if prev_c_illegal and mv.kind in ("D_SYN", "D_SPEC"):
                     pass  # answering an illegal challenger move with the D5 sentence is tolerated
                 elif prev_c.kind in ("C1", "C1_COND") and mv.kind not in ("D_ACC", "D_WHY"):
                     violate(f"illegal response family to C1: {mv.kind}")
                 if prev_c.kind == "C2" and mv.kind not in ("D_ACC", "D_ALR", "D_RNE", "D_NPV"):
                     violate(f"illegal response family to C2: {mv.kind}")
-                if prev_c.kind == "C3" and mv.kind not in ("D3A", "D3B"):
+                if prev_c.kind == "C3" and mv.kind not in ("D3A", "D3B", "D3C", "D3_NONE_EX", "D3_NONE_CE"):
                     violate(f"illegal response family to C3: {mv.kind}")
                 if prev_c.kind == "C4":
                     if getattr(prev_c, "c4_valid", False):
@@ -3037,6 +3084,7 @@ def score_match(transcript, facts=None):
                 ledger.last_valid_d_text = text
                 ledger.last_valid_d_move = mv
             prev_d, prev_d_text = mv, text
+            prev_d_prev_c_kind = prev_c.kind if prev_c is not None else None
             ledger.history.append((turn_no, role, mv, text))
             # v2.1: an open episode's window closes with the reply to
             # its second refutation consequence.
@@ -3089,7 +3137,7 @@ def score_match(transcript, facts=None):
             "trap_complexity": round(trap, 3),
         },
         "fidelity_detail": {"correct": fid_correct, "incorrect": fid_wrong, "unevaluable": fid_unknown},
-        "referee_version": "2.3",
+        "referee_version": "2.4",
         "justification_det": justification_det,
         "hard_justification_failures": hard_justification_failures,
         "epistemic_forfeit": epistemic_forfeit,

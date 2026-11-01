@@ -6,11 +6,11 @@ consequence style) on Purchok Jampa Tsultrim Gyatso's *Lorig*
 (*Blo rig gi rnam bzhag*, "Awarenesses and Knowers"), plus the deterministic
 referee and fact base that judge every move.
 
-The Defender in this package is **defender_v10** — the current version from
+The Defender in this package is **defender_v11** — the current version from
 a 35-iteration adversarial evolution loop in which Challenger agents tried
 to trap it into contradicting its own concessions, the root thesis, or
 Purchok's text. It survived iteration 35 (six matches) with no violations,
-no contradictions, and no upheld Khor lo! / Tsa! against it.
+no contradictions, and no upheld Khor sum! / Tsa! against it.
 
 **The challenge:** play the Challenger against this Defender and win —
 where "win" is defined mechanically by the referee (see *What counts as a
@@ -20,8 +20,8 @@ win* below), not by anyone's impression of the debate.
 
 | Path | What it is |
 |---|---|
-| `agents/defender_v10.md` | The Defender's complete instructions (system prompt). This is the opponent, unabridged. |
-| `harness/referee.py` | Deterministic referee, v2.3 (Python 3, standard library only). Validates move syntax, evaluates minor premises and pervasions against the fact base, maintains the Defender's concession ledger, judges Khor lo! / Tsa! calls, and scores the match. |
+| `agents/defender_v11.md` | The Defender's complete instructions (system prompt), current version. This is the opponent, unabridged. (`agents/defender_v10.md`, its predecessor, is retained for reference.) |
+| `harness/referee.py` | Deterministic referee, v2.4 (Python 3, standard library only). Validates move syntax, evaluates minor premises and pervasions against the fact base, maintains the Defender's concession ledger, judges Khor lo! / Tsa! calls, and scores the match. |
 | `harness/justification.py` | Referee support module (scores the Defender's per-turn justification payloads when a transcript carries them). |
 | `knowledge/facts.json` | The fact base: canonical subjects and predicates (exact strings), `is_a` facts, pervasions (with counterexamples where a pervasion is false), set relations, non-existent subjects. |
 | `knowledge/matrix.md` | The taxonomy of awarenesses and knowers: definitions and divisions, each quotation verified against the etext at recorded character offsets. |
@@ -62,7 +62,7 @@ Expected headline result (last line of the output):
 example Claude), together with access to this repository. The prompt
 instructs the model to instantiate the Defender itself — a separate
 context, or clearly delimited passes governed solely by
-`agents/defender_v10.md` — and to play Challenger against it, using only
+`agents/defender_v11.md` — and to play Challenger against it, using only
 the Defender's public move text for its own decisions, never editing a
 Defender response, and keeping the full record for referee scoring. One
 chat, no relaying.
@@ -71,7 +71,7 @@ chat, no relaying.
 chats (or two agents), so that neither side sees the other's private
 reasoning, and relay the moves yourself:
 
-1. **Set up the Defender chat.** Give it `agents/defender_v10.md` as its
+1. **Set up the Defender chat.** Give it `agents/defender_v11.md` as its
    system prompt / project instructions, word for word, unedited. Then
    send it a brief in this form:
 
@@ -129,7 +129,7 @@ python3 harness/referee.py score <transcript.json>
 The referee prints a full JSON report followed by a one-line summary:
 rule compliance, textual fidelity, ledger consistency, trap complexity,
 the number of ledger contradictions, and the number of valid C4 calls
-(Khor lo! / Tsa!).
+(Khor sum! / Tsa!).
 
 ## The debate in brief
 
@@ -139,9 +139,12 @@ the number of ledger contradictions, and the number of valid C4 calls
   (negated forms allowed; a bare conditional "If something is [Z], it
   follows that it is necessarily [Y]." is also a C1)
 - **C2** — "The subject, [X], it follows that it is [Y], because of being [Z]."
-- **C3** — "Posit an example." (only immediately after "Reason not
-  established" or "No pervasion", and in exactly these words)
-- **C4** — "Khor lo! …" (the Defender's latest move contradicts its own
+- **C3** — "Posit an example." (or the bare shorthand "Posit") — immediately after "Reason not
+  established" or "No pervasion", **or after any Defender answer to a bare
+  conditional**: if the Defender accepted the pervasion it must posit an
+  example of it, if it did not it must posit a counterexample, and if none
+  exists it must say so ("There is no example." / "There is no counterexample.")
+- **C4** — "Khor sum! …" (the Defender's latest move contradicts its own
   earlier concessions) or "Tsa! …" (it contradicts the root thesis or
   Purchok's text) — in both cases **followed by a demonstration** naming
   the earlier concession and the contradicting statement.
@@ -194,9 +197,9 @@ unevaluable and cannot produce a referee-valid win.
 The Challenger wins if and only if the referee's report on the final
 transcript shows at least one of:
 
-1. `valid_khorlo_tsa_count` ≥ 1 — a Khor lo! or Tsa! the referee upholds:
+1. `valid_khorlo_tsa_count` ≥ 1 — a Khor sum! or Tsa! the referee upholds:
    the Defender's move contradicts the closure of its own concession
-   ledger (Khor lo!), or entails the negation of the root thesis /
+   ledger (Khor sum!), or entails the negation of the root thesis /
    directly contradicts Purchok's text as recorded in the fact base
    (Tsa!);
 2. a recorded forced-Accept failure / ledger contradiction produced by
@@ -221,5 +224,12 @@ impressionistic judging, and design changes were worked out with an
 external engineering consultant. Its known biography in one line: the
 only Defender loss between iterations 2 and 35 was a single match in
 iteration 11, against a predecessor version; defender_v10 itself has
-never lost. The full iteration log lives in the parent project and is not
+never lost. defender_v11 (2026-11-01) adds the user's live-match
+amendments: the expanded Posit/example duty, subject-independent
+text-established pervasions, valid Challenger shorthand, elliptical
+subjects, the Khor sum! rename, and the definition/definiendum rules
+(a definition can be known without the definiendum being known; a
+definiendum cannot be known without its definition; definition and
+definiendum have the eight doors of pervasion — they are mutually
+inclusive). The referee is v2.4 (self-test 156/156). The full iteration log lives in the parent project and is not
 needed to use this package.

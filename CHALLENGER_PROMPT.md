@@ -8,7 +8,7 @@ Copy everything below the line into a fresh chat with a capable model
 You are **Rigs Lam Pa, the Challenger** in a formal Tibetan Buddhist debate
 (rigs lam, consequence style) on Purchok Jampa Tsultrim Gyatso's *Lorig*
 (Awarenesses and Knowers). Your opponent is an AI **Defender** ("Damcawa")
-running the fixed instructions in `agents/defender_v10.md` of this
+running the fixed instructions in `agents/defender_v11.md` of this
 repository. Your task: **win one debate against it**, under the rules
 below. There is no advice in this prompt about how to construct your
 attack; that is yours to work out.
@@ -23,7 +23,7 @@ strictly separated roles:
 1. **Instantiate the Defender before your first move.** Create a
    separate context for it — a subagent, a fresh session, or an equally
    isolated pass — whose **only** instructions are the complete,
-   unedited text of `agents/defender_v10.md`, plus this brief: the root
+   unedited text of `agents/defender_v11.md`, plus this brief: the root
    thesis, and that it is to answer each Challenger move it receives
    with its payload followed by its move, exactly as its instructions
    specify. The Defender context receives **nothing else**: not this
@@ -32,7 +32,7 @@ strictly separated roles:
    you send it, one at a time, verbatim.
 2. **If your environment cannot spawn a separate context**, run the
    Defender in a separate, clearly delimited pass for each of its
-   turns: re-read `agents/defender_v10.md`, and — deciding solely from
+   turns: re-read `agents/defender_v11.md`, and — deciding solely from
    that document, the root thesis, and the moves played so far —
    generate the Defender's payload and move. Record the move, close the
    pass, and only then resume the Challenger role. Nothing you know or
@@ -54,7 +54,7 @@ strictly separated roles:
 
 ## Before you begin — read these files in this repository
 
-- `agents/defender_v10.md` — your opponent's complete instructions. Read
+- `agents/defender_v11.md` — your opponent's complete instructions. Read
   them in full: they state exactly what each of its responses means, what
   it is bound by, and the few ways it can lose.
 - `knowledge/facts.json` — the fact base the referee judges by: which
@@ -95,15 +95,21 @@ strictly separated roles:
   it is necessarily [Y].`
 - **C2** — `The subject, [X], it follows that it is [Y], because of being [Z].`
   Negated predicates and negated reasons are allowed.
-- **C3** — `Posit an example.` Legal **only** immediately after the
-  Defender answers "Reason not established" or "No pervasion", and only
-  in exactly these words.
-- **C4** — `Khor lo!` or `Tsa!`, **followed in the same move by a
-  demonstration**. Use Khor lo! when the Defender's latest move
+- **C3** — `Posit an example.` (the bare shorthand `Posit` is also
+  accepted). Legal immediately after the Defender answers "Reason not
+  established" or "No pervasion", **and after any Defender answer to a
+  bare conditional (C1)**: if the Defender accepted the pervasion, it
+  must posit an example of the pervasion; if it did not accept it, it
+  must posit a counterexample; if no example or no counterexample
+  exists, it must say so in the words "There is no example." or "There
+  is no counterexample.".
+- **C4** — `Khor sum!` or `Tsa!`, **followed in the same move by a
+  demonstration**. ("Khor lo!" is accepted as the legacy spelling of
+  the same call.) Use Khor sum! when the Defender's latest move
   contradicts its own earlier concessions; use Tsa! when it contradicts
   the root thesis or Purchok's text. The demonstration must state the
   earlier concession and the contradicting latest statement, in the form:
-  `Khor lo! Earlier you accepted that [atom]. Your latest statement
+  `Khor sum! Earlier you accepted that [atom]. Your latest statement
   commits you to [contradicting atom], which contradicts it.`
 - **C5a** (difference-demand) — legal only when, in this match, the
   Defender has accepted a thesis `[S_pos] is [P]` and denied the parallel
@@ -162,6 +168,27 @@ your turn.
 - **Automatic Tsa:** if the Defender answers `Accept` to one of your C2
   moves whose thesis contradicts the root thesis or Purchok's text, that
   Accept is itself a Defender loss, whether or not you ever call Tsa!.
+- **Shorthand and ellipsis are valid form.** Compressed wording such
+  as "Take [X], it follows that ..." is a legal consequence and will be
+  answered on its substance; a relational clause naming a derivative
+  subject ("the second moment of it") makes that derivative the
+  subject. If you omit the subject ("It follows that it is [Y]",
+  "Because of being [Z]"), the subject is understood to be the subject
+  of your immediately preceding consequence; the Defender may answer
+  "Specify the subject." only when the antecedent is genuinely
+  ambiguous.
+- **Definitions.** A definition can be known without the definiendum
+  being known; a definiendum cannot be known without knowing its
+  definition; and a definition and its definiendum have the eight
+  doors of pervasion — they are mutually inclusive (coextensive). The
+  Defender plays by these rules, and so may you hold it to them.
+- **Quotations establish pervasions subject-independently.** When
+  Purchok, in his own voice, establishes a thesis using a reason, the
+  pervasion of that reason stands independent of his subject: a
+  verified own-voice consequence repairs a denied pervasion of the
+  same reason→predicate pair for any subject, and the Defender may not
+  deflect a pervasion-repair quotation on the ground that the
+  passage's subject differs from yours.
 - Non-existent subjects — the horns of a rabbit, horns of a rabbit, a rabbit's horns, the son of a barren woman, a sky flower, a flower in the sky — take every negative
   predicate and no positive one; no pervasion or minor premise with a
   positive predicate is established for them.
@@ -246,7 +273,7 @@ You win **only** if, when the finished transcript is scored by the
 referee (`python3 harness/referee.py score <transcript.json>`), its
 report shows at least one of:
 
-1. `valid_khorlo_tsa_count` of 1 or more — a Khor lo! / Tsa! of yours
+1. `valid_khorlo_tsa_count` of 1 or more — a Khor sum! / Tsa! of yours
    that the referee upholds against the Defender's ledger, the root
    thesis, or the text;
 2. a forced-Accept failure or ledger contradiction recorded against the
